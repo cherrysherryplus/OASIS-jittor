@@ -73,16 +73,16 @@ class OASIS_model(nn.Module):
             which_iter = self.opt.ckpt_iter
             path = os.path.join(self.opt.checkpoints_dir, self.opt.name, "models", str(which_iter) + "_")
             if self.opt.no_EMA:
-                self.netG.load_state_dict(jt.load(path + "G.pth"))
+                self.netG.load_state_dict(jt.load(path + "G.pkl"))
             else:
-                self.netEMA.load_state_dict(jt.load(path + "EMA.pth"))
+                self.netEMA.load_state_dict(jt.load(path + "EMA.pkl"))
         elif self.opt.continue_train:
             which_iter = self.opt.which_iter
             path = os.path.join(self.opt.checkpoints_dir, self.opt.name, "models", str(which_iter) + "_")
-            self.netG.load_state_dict(jt.load(path + "G.pth"))
-            self.netD.load_state_dict(jt.load(path + "D.pth"))
+            self.netG.load_state_dict(jt.load(path + "G.pkl"))
+            self.netD.load_state_dict(jt.load(path + "D.pkl"))
             if not self.opt.no_EMA:
-                self.netEMA.load_state_dict(jt.load(path + "EMA.pth"))
+                self.netEMA.load_state_dict(jt.load(path + "EMA.pkl"))
 
 
     def print_parameter_count(self):

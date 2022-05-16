@@ -89,7 +89,7 @@ class losses_saver():
             if loss is None:
                 self.cur_estimates[i] = None
             else:
-                self.cur_estimates[i] += loss.detach().cpu().numpy()
+                self.cur_estimates[i] += loss.detach().numpy()
         if epoch % self.freq_smooth_loss == self.freq_smooth_loss-1:
             for i, loss in enumerate(losses):
                 if not self.cur_estimates[i] is None:
@@ -218,7 +218,7 @@ class image_saver():
 def tens_to_im(tens):
     out = (tens + 1) / 2
     out.clamp(0, 1)
-    return np.transpose(out.detach().cpu().numpy(), (1, 2, 0))
+    return np.transpose(out.detach().numpy(), (1, 2, 0))
 
 
 def tens_to_lab(tens, num_cl):
@@ -244,10 +244,10 @@ def Colorize(tens, num_cl):
     size = tens.size()
     color_image = jt.zeros((3, size[1], size[2]), jt.uint8)
     # jt.argmax会返回一个元组，第一个元素是索引，第二个元素是索引对应的值
-    tens, _ = jt.argmax(tens, dim=0, keepdim=True)
+    tens, _ = jt.argmax(tens, dim=0, keepdims=True)
 
     for label in range(0, len(cmap)):
-        mask = (label == tens[0]).cpu()
+        mask = (label == tens[0])
         color_image[0][mask] = cmap[label][0]
         color_image[1][mask] = cmap[label][1]
         color_image[2][mask] = cmap[label][2]

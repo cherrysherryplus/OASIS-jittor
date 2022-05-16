@@ -88,7 +88,7 @@ class fid_jittor():
         --   : The Frechet Distance.
         """
 
-        mu1, sigma1, mu2, sigma2 = mu1.detach().cpu().numpy(), sigma1.detach().cpu().numpy(), mu2.detach().cpu().numpy(), sigma2.detach().cpu().numpy()
+        mu1, sigma1, mu2, sigma2 = mu1.detach().numpy(), sigma1.detach().numpy(), mu2.detach().numpy(), sigma2.detach().numpy()
 
         mu1 = np.atleast_1d(mu1)
         mu2 = np.atleast_1d(mu2)

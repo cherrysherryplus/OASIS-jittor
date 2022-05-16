@@ -120,7 +120,7 @@ def get_activations(files, model, batch_size=50, dims=2048,
         #import matplotlib.pyplot as plt
         #import numpy
 
-        #plt.imshow(np.rollaxis(batch[0].detach().cpu().numpy(), 0, 3))
+        #plt.imshow(np.rollaxis(batch[0].detach().numpy(), 0, 3))
         #plt.show()
 
         # if cuda:
@@ -133,7 +133,7 @@ def get_activations(files, model, batch_size=50, dims=2048,
         if pred.shape[2] != 1 or pred.shape[3] != 1:
             pred = AdaptiveAvgPool2d(output_size=(1, 1))(pred)
 
-        pred_arr[start:end] = pred.cpu().data.numpy().reshape(batch_size, -1)
+        pred_arr[start:end] = pred.numpy().reshape(batch_size, -1)
 
     if verbose:
         print(' done')
