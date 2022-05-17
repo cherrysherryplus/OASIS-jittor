@@ -127,7 +127,7 @@ class fid_jittor():
 
     def update(self, model, cur_iter):
         print("--- Iter %s: computing FID ---" % (cur_iter))
-        cur_fid = self.compute_fid_with_valid_path(model.module.netG, model.module.netEMA)
+        cur_fid = self.compute_fid_with_valid_path(model.netG, model.netEMA)
         self.update_logs(cur_fid, cur_iter)
         print("--- FID at Iter %s: " % cur_iter, "{:.2f}".format(cur_fid))
         if cur_fid < self.best_fid:

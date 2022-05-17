@@ -12,9 +12,13 @@ if __name__ == '__main__':
     opt = config.read_arguments(train=True)
     opt.dataroot = "./datasets/sample_images"
     opt.no_spectral_norm = True
+    opt.num_epochs = 2
+    # 24g p40 也不能把batch调到 8
+    opt.batch_size = 8
+    opt.freq_fid = 4
     
     #--- cuda ---#
-    jt.use_cuda = (jt.has_cuda and opt.gpu_ids!="-1")
+    jt.flags.use_cuda = (jt.has_cuda and opt.gpu_ids!="-1")
 
     #--- create utils ---#
     timer = utils.timer(opt)
@@ -74,6 +78,11 @@ if __name__ == '__main__':
                 if is_best:
                     utils.save_networks(opt, cur_iter, model, best=True)
             visualizer_losses(cur_iter, losses_G_list+losses_D_list)
+
+            # 在每个迭代内部，让Jittor强制回收内存
+            jt.sync_all()
+            jt.gc()
+
         print(f"{epoch} epoch end~~~~~~")
 
     #--- after training ---#
