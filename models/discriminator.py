@@ -32,6 +32,7 @@ class OASIS_Discriminator(nn.Module):
         #decoder
         x = self.body_up[0](x)
         for i in range(1, len(self.body_down)):
+            print(f"current i={i} is ok")
             x = self.body_up[i](jt.concat((encoder_res[-i-1], x), dim=1))
         ans = self.layer_up_last(x)
         return ans
