@@ -20,9 +20,10 @@ if __name__ == '__main__':
     #--- cuda ---#
     # export JT_SYNC=1
     jt.flags.use_cuda = (jt.has_cuda and opt.gpu_ids!="-1")
-    jt.flags.use_cuda_managed_allocator = 1
-    jt.flags.trace_py_var = 3
-    jt.flags.lazy_execution = 0
+    jt.flags.amp_reg = jt.flags.amp_reg | 4
+    # jt.flags.use_cuda_managed_allocator = 1
+    # jt.flags.trace_py_var = 3
+    # jt.flags.lazy_execution = 0
     
     # jt.cudnn.set_max_workspace_ratio(0.0)
 
@@ -54,7 +55,7 @@ if __name__ == '__main__':
             already_started = True
             cur_iter = epoch*len(dataloader) + i
             image, label = models.preprocess_input(opt, data_i)
-
+            
             #--- generator update ---#
             # jittor不会累积梯度
             # model.netG.zero_grad()

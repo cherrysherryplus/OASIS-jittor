@@ -80,8 +80,9 @@ class LandscapeDataset(dataset.Dataset):
                 image = transform.hflip(image)
                 label = transform.hflip(label)
         # to tensor（像RGB mode下的PIL.Image对象，会转换为FloatTensor，同时会缩放到[0,1.0]，所以后续label会乘上255）
-        image = transform.to_tensor(image)
-        label = transform.to_tensor(label)
         # normalize（只有图片要规范化）
-        image = transform.image_normalize(image, [0.5], [0.5])
+        # image = transform.to_tensor(image) （二者选一即可，to_tensor和image_normalize/ImageNormalize）
+        # image = transform.image_normalize(image, [0.5], [0.5])
+        image = transform.ImageNormalize([0.5], [0.5])(image)
+        label = transform.to_tensor(label)
         return image, label
