@@ -12,6 +12,7 @@ if __name__ == '__main__':
     opt = config.read_arguments(train=True)
     opt.dataroot = "./datasets/sample_images"
     opt.no_spectral_norm = True
+    opt.norm_mod = True
     opt.num_epochs = 2
     # 24g p40 也不能把batch调到 8
     opt.batch_size = 8

@@ -48,6 +48,7 @@ def add_all_arguments(parser, train):
 
     ## 默认使用batchnorm，因为一般是单卡训练，虽然syncbn的效果更好
     parser.add_argument('--param_free_norm', type=str, default='batch', help='which norm to use in generator before SPADE')
+    parser.add_argument('--norm_mod', type=bool, default=True, help='use SPADE or not(CLADE)')
     parser.add_argument('--spade_ks', type=int, default=3, help='kernel size of convs inside SPADE')
     parser.add_argument('--no_EMA', action='store_true', help='if specified, do *not* compute exponential moving averages')
     parser.add_argument('--EMA_decay', type=float, default=0.9999, help='decay in exponential moving averages')

@@ -59,11 +59,16 @@ class ResnetBlock_with_SPADE(nn.Module):
         spade_conditional_input_dims = opt.semantic_nc
         if not opt.no_3dnoise:
             spade_conditional_input_dims += opt.z_dim
-
-        self.norm_0 = norms.SPADE(opt, fin, spade_conditional_input_dims)
-        self.norm_1 = norms.SPADE(opt, fmiddle, spade_conditional_input_dims)
-        if self.learned_shortcut:
-            self.norm_s = norms.SPADE(opt, fin, spade_conditional_input_dims)
+        if opt.norm_mod:
+            self.norm_0 = norms.SPADE(opt, fin, spade_conditional_input_dims)
+            self.norm_1 = norms.SPADE(opt, fmiddle, spade_conditional_input_dims)
+            if self.learned_shortcut:
+                self.norm_s = norms.SPADE(opt, fin, spade_conditional_input_dims)
+        else:
+            self.norm_0 = norms.SPADELight(opt, fin, spade_conditional_input_dims)
+            self.norm_1 = norms.SPADELight(opt, fmiddle, spade_conditional_input_dims)
+            if self.learned_shortcut:
+                self.norm_s = norms.SPADELight(opt, fin, spade_conditional_input_dims)
         self.activ = nn.LeakyReLU(0.2)
 
     def execute(self, x, seg):
