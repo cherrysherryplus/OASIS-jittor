@@ -15,12 +15,13 @@ if __name__ == '__main__':
     opt.num_epochs = 2
     # 24g p40 也不能把batch调到 8
     opt.batch_size = 1
-    opt.freq_fid = 2
+    opt.freq_fid = 4
+    opt.freq_print = 1
     
     #--- cuda ---#
     # export JT_SYNC=1
     jt.flags.use_cuda = (jt.has_cuda and opt.gpu_ids!="-1")
-    jt.flags.amp_reg = jt.flags.amp_reg | 4
+    # jt.flags.amp_reg = jt.flags.amp_reg | 4
     # jt.flags.use_cuda_managed_allocator = 1
     # jt.flags.trace_py_var = 3
     # jt.flags.lazy_execution = 0
@@ -69,7 +70,7 @@ if __name__ == '__main__':
             # model.netG.zero_grad()
             loss_D, losses_D_list = model(image, label, "losses_D", losses_computer)
             loss_D, losses_D_list = loss_D.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list]
-            print(type(loss_D), loss_D)
+            # print(type(loss_D), loss_D)
             optimizerD.zero_grad()
             optimizerD.backward(loss_D)
             optimizerD.step()

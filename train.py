@@ -34,7 +34,7 @@ for epoch in range(start_epoch, opt.num_epochs):
             continue
         already_started = True
         cur_iter = epoch*len(dataloader) + i
-        print(cur_iter)
+        # print(cur_iter)
         image, label = models.preprocess_input(opt, data_i)
 
         #--- generator update ---#
