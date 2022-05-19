@@ -48,6 +48,9 @@ def get_norm_layer(opt, norm_nc):
                          % opt.param_free_norm)
 
 class SPADELight(nn.Module):
+    """
+    采用CLADE模块的改版SPAE，参数量大幅减少，计算复杂度下降
+    """
     def __init__(self, opt, norm_nc, label_nc, no_instance=True, add_dist=False):
         super().__init__()
         self.no_instance = no_instance
@@ -74,17 +77,17 @@ class SPADELight(nn.Module):
 
     def execute(self, x, segmap, input_dist=None):
 
-        # Part 1. generate parameter-free normalized activations
+        # Part 1. 基础的归一化操作
         normalized = self.param_free_norm(x)
 
-        # Part 2. scale the segmentation mask
+        # Part 2. scale 类别掩码图
         segmap = nn.interpolate(segmap, size=x.size()[2:], mode='nearest')
 
         # if not self.no_instance:
         #     inst_map = torch.unsqueeze(segmap[:,-1,:,:],1)
         #     segmap = segmap[:,:-1,:,:]
 
-        # Part 3. class affine with noise
+        # Part 3. 类别归一化
         out = self.class_specified_affine(normalized, segmap, input_dist)
 
         # if not self.no_instance:
@@ -94,6 +97,9 @@ class SPADELight(nn.Module):
         return out
 
 class ClassAffine(nn.Module):
+    """
+    CLADE归一化，通过类别自适应归一化，降低SPAED里对于空间归一化的计算复杂度。
+    """
     def __init__(self, label_nc, affine_nc, add_dist=False):
         super(ClassAffine, self).__init__()
         self.add_dist = add_dist
