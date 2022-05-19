@@ -107,7 +107,9 @@ class OASIS_model(nn.Module):
                 if hasattr(m, 'bias') and m.bias is not None:
                     init.constant_(m.bias, 0.0)
             elif hasattr(m, 'weight') and (classname.find('Conv') != -1 or classname.find('Linear') != -1):
+
                 init.xavier_gauss_(m.weight, gain=gain)
+
                 if hasattr(m, 'bias') and m.bias is not None:
                     init.constant_(m.bias, 0.0)
 
@@ -117,6 +119,8 @@ class OASIS_model(nn.Module):
             networks = [self.netG]
         for net in networks:
             net.apply(init_weights)
+
+
 
 
 def preprocess_input(opt, data):

@@ -17,6 +17,7 @@ if __name__ == '__main__':
     opt.batch_size = 8
     opt.freq_fid = 1
     opt.use_DPM=True
+    opt.phase='train'
     
     #--- cuda ---#
     jt.flags.use_cuda = (jt.has_cuda and opt.gpu_ids!="-1")
