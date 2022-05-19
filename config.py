@@ -27,17 +27,17 @@ def read_arguments(train=True):
 
 def add_all_arguments(parser, train):
     #--- general options ---
-    parser.add_argument('--name', type=str, default='label2coco', help='name of the experiment. It decides where to store samples and models')
+    parser.add_argument('--name', type=str, default='label_landscape', help='name of the experiment. It decides where to store samples and models')
     parser.add_argument('--seed', type=int, default=42, help='random seed')
     ## gpu_ids
     parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
 
     parser.add_argument('--checkpoints_dir', type=str, default='./checkpoints', help='models are saved here')
-    parser.add_argument('--no_spectral_norm', action='store_true', help='this option deactivates spectral norm in all layers')
-    parser.add_argument('--batch_size', type=int, default=1, help='input batch size')
+    parser.add_argument('--no_spectral_norm', action='store_true',help='this option deactivates spectral norm in all layers')
+    parser.add_argument('--batch_size', type=int, default=2, help='input batch size')
 
     ## 默认使用计图的数据集 landscape
-    parser.add_argument('--dataroot', type=str, default='./datasets/landscape/', help='path to dataset root')
+    parser.add_argument('--dataroot', type=str, default='/home/Data/OASIS_jittor/datasets/sample_images', help='path to dataset root')
     parser.add_argument('--dataset_mode', type=str, default='landscape', help='this option indicates which dataset should be loaded')
     
     parser.add_argument('--no_flip', action='store_true', help='if specified, do not flip the images for data argumentation')

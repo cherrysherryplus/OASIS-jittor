@@ -14,11 +14,15 @@ class losses_computer():
         #--- n+1 loss ---
         target = get_n1_target(self.opt, input, label, for_real)
         loss = nn.cross_entropy_loss(input, target, reduction='none')
+        #
+        # print("weight_map:",weight_map.shape)
+        # print("loss:",loss.shape)
         if for_real:
             loss = jt.mean(loss * weight_map[:, 0, :, :])
         else:
             loss = jt.mean(loss)
         return loss
+
 
     def loss_labelmix(self, mask, output_D_mixed, output_D_fake, output_D_real):
         mixed_D_output = mask*output_D_real+(1-mask)*output_D_fake

@@ -15,7 +15,8 @@ if __name__ == '__main__':
     opt.num_epochs = 2
     # 24g p40 也不能把batch调到 8
     opt.batch_size = 8
-    opt.freq_fid = 4
+    opt.freq_fid = 1
+    opt.use_DPM=True
     
     #--- cuda ---#
     jt.flags.use_cuda = (jt.has_cuda and opt.gpu_ids!="-1")
@@ -44,7 +45,9 @@ if __name__ == '__main__':
                 continue
             already_started = True
             cur_iter = epoch*len(dataloader) + i
+            cur_iter =0
             image, label = models.preprocess_input(opt, data_i)
+            # print('预处理完后的label：',label)
 
             #--- generator update ---#
             # jittor不会累积梯度
@@ -63,6 +66,9 @@ if __name__ == '__main__':
             optimizerD.backward(loss_D)
             optimizerD.step()
 
+
+            print(f'''epoch:{epoch},batch:{i+1},loss_D:{loss_D:.4},loss_G:{loss_G:.4}''')
+
             #--- stats update ---#
             if not opt.no_EMA:
                 utils.update_EMA(model, cur_iter, dataloader, opt)
@@ -79,9 +85,11 @@ if __name__ == '__main__':
                     utils.save_networks(opt, cur_iter, model, best=True)
             visualizer_losses(cur_iter, losses_G_list+losses_D_list)
 
-            # 在每个迭代内部，让Jittor强制回收内存
+            #在每个迭代内部，让Jittor强制回收内存
             jt.sync_all()
             jt.gc()
+
+
 
         print(f"{epoch} epoch end~~~~~~")
 

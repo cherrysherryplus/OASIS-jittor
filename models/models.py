@@ -11,7 +11,7 @@ import models.losses as losses
 
 class OASIS_model(nn.Module):
     def __init__(self, opt):
-        super().__init__()
+        super(OASIS_model, self).__init__()
         self.opt = opt
         self.netG = generators.OASIS_Generator(opt)
         if opt.phase == 'train':
@@ -67,7 +67,6 @@ class OASIS_model(nn.Module):
                     fake = self.netEMA(label)
                 return fake
 
-
     def load_checkpoints(self):
         if self.opt.phase == "test":
             which_iter = self.opt.ckpt_iter
@@ -84,7 +83,6 @@ class OASIS_model(nn.Module):
             if not self.opt.no_EMA:
                 self.netEMA.load_state_dict(jt.load(path + "EMA.pkl"))
 
-
     def print_parameter_count(self):
         if self.opt.phase == "train":
             networks = [self.netG, self.netD]
@@ -99,7 +97,6 @@ class OASIS_model(nn.Module):
                     # p.data时np ndarray, size属性是元素个数
                     param_count += sum([np.prod(p.shape) for p in module.parameters()])
             print('Created', network.__class__.__name__, "with %d parameters" % param_count)
-
 
     def init_networks(self):
         def init_weights(m, gain=0.02):
@@ -125,6 +122,7 @@ class OASIS_model(nn.Module):
 def preprocess_input(opt, data):
     data['label'] = data['label'].long()
     label_map = data['label']
+    # print('label_map:',label_map)
     bs, _, h, w = label_map.size()
     nc = opt.semantic_nc
     # 默认类型就是float32
@@ -136,10 +134,13 @@ def preprocess_input(opt, data):
 def generate_labelmix(opt, label, fake_image, real_image):
     target_map, _ = jt.argmax(label, dim=1, keepdims=True)
     all_classes = jt.unique(target_map)
+    # print(all_classes)
+
+    # all_classes = jt.unique(target_map)
     for c in all_classes:
         mask = jt.randint(0, 2, (1,))
         target_map[target_map == c] = mask
+
     target_map = target_map.float()
     mixed_image = target_map * real_image + (1 - target_map) * fake_image
     return mixed_image, target_map
-

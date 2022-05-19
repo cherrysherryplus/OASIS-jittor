@@ -1,4 +1,6 @@
 import random
+
+import jittor
 from jittor import dataset,transform
 import os
 import os.path as osp
@@ -82,6 +84,9 @@ class LandscapeDataset(dataset.Dataset):
         # to tensor（像RGB mode下的PIL.Image对象，会转换为FloatTensor，同时会缩放到[0,1.0]，所以后续label会乘上255）
         image = transform.to_tensor(image)
         label = transform.to_tensor(label)
+        image = jittor.float32(image)
+        label = jittor.float32(label)
+        # print('原始数据label:',label)
         # normalize（只有图片要规范化）
         image = transform.image_normalize(image, [0.5], [0.5])
         return image, label

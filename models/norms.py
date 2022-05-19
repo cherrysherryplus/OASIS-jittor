@@ -1,7 +1,7 @@
 import jittor.nn as nn
 # TODO 谱归一化
 # import torch.nn.utils.spectral_norm as spectral_norm
-
+# import spectral_norm as spectral_norm
 
 class SPADE(nn.Module):
     def __init__(self, opt, norm_nc, label_nc):
