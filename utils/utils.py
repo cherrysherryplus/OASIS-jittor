@@ -223,7 +223,8 @@ def tens_to_im(tens):
 
 def tens_to_lab(tens, num_cl):
     label_tensor = Colorize(tens, num_cl)
-    label_numpy = np.transpose(label_tensor.numpy(), (1, 2, 0))
+    print("label_tensor: ", label_tensor.shape)
+    label_numpy = np.transpose(label_tensor.data, (1, 2, 0))
     return label_numpy
 
 

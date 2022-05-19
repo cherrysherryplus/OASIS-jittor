@@ -14,11 +14,22 @@ if __name__ == '__main__':
     opt.no_spectral_norm = True
     opt.num_epochs = 2
     # 24g p40 也不能把batch调到 8
-    opt.batch_size = 8
+    opt.batch_size = 1
     opt.freq_fid = 4
+    opt.freq_print = 1
     
     #--- cuda ---#
+    # export JT_SYNC=1
     jt.flags.use_cuda = (jt.has_cuda and opt.gpu_ids!="-1")
+    # jt.flags.amp_reg = jt.flags.amp_reg | 4
+    # jt.flags.use_cuda_managed_allocator = 1
+    # jt.flags.trace_py_var = 3
+    # jt.flags.lazy_execution = 0
+    
+    # jt.cudnn.set_max_workspace_ratio(0.0)
+
+    
+    #--- use 
 
     #--- create utils ---#
     timer = utils.timer(opt)
@@ -45,7 +56,7 @@ if __name__ == '__main__':
             already_started = True
             cur_iter = epoch*len(dataloader) + i
             image, label = models.preprocess_input(opt, data_i)
-
+            
             #--- generator update ---#
             # jittor不会累积梯度
             # model.netG.zero_grad()
@@ -59,6 +70,7 @@ if __name__ == '__main__':
             # model.netG.zero_grad()
             loss_D, losses_D_list = model(image, label, "losses_D", losses_computer)
             loss_D, losses_D_list = loss_D.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list]
+            # print(type(loss_D), loss_D)
             optimizerD.zero_grad()
             optimizerD.backward(loss_D)
             optimizerD.step()
@@ -67,7 +79,7 @@ if __name__ == '__main__':
             if not opt.no_EMA:
                 utils.update_EMA(model, cur_iter, dataloader, opt)
             if cur_iter % opt.freq_print == 0:
-                im_saver.visualize_batch(model, image, label, cur_iter)
+                # im_saver.visualize_batch(model, image, label, cur_iter)
                 timer(epoch, cur_iter)
             if cur_iter % opt.freq_save_ckpt == 0:
                 utils.save_networks(opt, cur_iter, model)
