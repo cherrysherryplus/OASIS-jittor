@@ -131,11 +131,11 @@ class ClassAffine(nn.Module):
     #     return class_weight, class_bias
 
     def affine_embed(self, mask):
-        arg_mask = jt.argmax(mask, 1).long() # [n, h, w]
+        arg_mask, _ = jt.argmax(mask, 1) # [n, h, w]
         embedding_weigth = nn.Embedding(self.label_nc, self.affine_nc)
         embedding_bias = nn.Embedding(self.label_nc, self.affine_nc)
-        class_weight = embedding_weigth(arg_mask).permute(0, 3, 1, 2) # [n, c, h, w]
-        class_bias = embedding_bias(arg_mask).permute(0, 3, 1, 2) # [n, c, h, w]
+        class_weight = embedding_weigth(arg_mask.long()).permute(0, 3, 1, 2) # [n, c, h, w]
+        class_bias = embedding_bias(arg_mask.long()).permute(0, 3, 1, 2) # [n, c, h, w]
         return class_weight, class_bias
 
     def execute(self, input, mask, input_dist=None):
