@@ -27,8 +27,6 @@ class OASIS_Generator(nn.Module):
 
     def execute(self, input, z=None):
         seg = input
-        # if self.opt.gpu_ids != "-1":
-        #     seg.cuda()
         if not self.opt.no_3dnoise:
             z = jt.randn(seg.size(0), self.opt.z_dim, dtype=jt.float32)
             z = z.view(z.size(0), self.opt.z_dim, 1, 1)
@@ -76,7 +74,8 @@ class ResnetBlock_with_SPADE(nn.Module):
             x_s = self.conv_s(self.norm_s(x, seg))
         else:
             x_s = x
-        dx = self.conv_0(self.activ(self.norm_0(x, seg)))
+        dx = self.activ(self.norm_0(x, seg))
+        dx = self.conv_0(dx)
         dx = self.conv_1(self.activ(self.norm_1(dx, seg)))
         out = x_s + dx
         return out

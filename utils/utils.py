@@ -11,7 +11,9 @@ from PIL import Image
 # 设置随机数种子(python numpy jittor cupy)
 # https://cg.cs.tsinghua.edu.cn/jittor/assets/docs/_modules/jittor/misc.html#set_global_seed
 def fix_seed(seed):
+    random.seed(seed)
     jt.set_global_seed(seed)
+    np.random.seed(seed)
 
 
 # 计算开始的epoch和iter
@@ -248,9 +250,9 @@ def Colorize(tens, num_cl):
 
     for label in range(0, len(cmap)):
         mask = (label == tens[0])
-        color_image[0][mask] = cmap[label][0]
-        color_image[1][mask] = cmap[label][1]
-        color_image[2][mask] = cmap[label][2]
+        color_image[0,mask] = cmap[label][0]
+        color_image[1,mask] = cmap[label][1]
+        color_image[2,mask] = cmap[label][2]
     return color_image
 
 

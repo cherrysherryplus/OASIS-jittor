@@ -3,6 +3,7 @@ import jittor.linalg as lg
 import jittor as jt
 # TODO 谱归一化
 # import torch.nn.utils.spectral_norm as spectral_norm
+from models.spectral_norm import spectral_norm
 
 
 class SPADE(nn.Module):
@@ -33,8 +34,7 @@ def get_spectral_norm(opt):
     if opt.no_spectral_norm:
         return nn.Identity()
     else:
-        return None
-        # return spectral_norm
+        return spectral_norm
 
 
 # 计图支持多卡并行的bn，但不支持syncbn

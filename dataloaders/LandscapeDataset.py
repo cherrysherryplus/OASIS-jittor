@@ -83,6 +83,7 @@ class LandscapeDataset(dataset.Dataset):
         # normalize（只有图片要规范化）
         # image = transform.to_tensor(image) （二者选一即可，to_tensor和image_normalize/ImageNormalize）
         # image = transform.image_normalize(image, [0.5], [0.5])
+        image = transform.to_tensor(image)
         image = transform.ImageNormalize([0.5], [0.5])(image)
         label = transform.to_tensor(label)
         return image, label

@@ -11,13 +11,14 @@ if __name__ == '__main__':
     #--- read options ---#
     opt = config.read_arguments(train=True)
     opt.dataroot = "./datasets/sample_images"
-    opt.no_spectral_norm = True
+    # opt.no_spectral_norm = True
     opt.norm_mod = True
     opt.num_epochs = 2
     # 24g p40 也不能把batch调到 8
     opt.batch_size = 1
     opt.freq_fid = 4
     opt.freq_print = 1
+    # opt.freq_save_loss = 1
     
     #--- cuda ---#
     # export JT_SYNC=1
@@ -28,9 +29,6 @@ if __name__ == '__main__':
     # jt.flags.lazy_execution = 0
     
     # jt.cudnn.set_max_workspace_ratio(0.0)
-
-    
-    #--- use 
 
     #--- create utils ---#
     timer = utils.timer(opt)
@@ -61,20 +59,21 @@ if __name__ == '__main__':
             #--- generator update ---#
             # jittor不会累积梯度
             # model.netG.zero_grad()
+
             loss_G, losses_G_list = model(image, label, "losses_G", losses_computer)
             loss_G, losses_G_list = loss_G.mean(), [loss.mean() if loss is not None else None for loss in losses_G_list]
             optimizerG.zero_grad()
             optimizerG.backward(loss_G)
             optimizerG.step()
+            # print(optimizerG.param_groups[0]['grads'][0].sum())
 
             #--- discriminator update ---#
-            # model.netG.zero_grad()
+            # model.netD.zero_grad()
             loss_D, losses_D_list = model(image, label, "losses_D", losses_computer)
             loss_D, losses_D_list = loss_D.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list]
-            # print(type(loss_D), loss_D)
-            optimizerD.zero_grad()
-            optimizerD.backward(loss_D)
-            optimizerD.step()
+            optimizerD.step(loss_D)
+
+            # print(f"loss_G: {loss_G}, loss_D: {loss_D}")
 
             #--- stats update ---#
             if not opt.no_EMA:
@@ -92,11 +91,10 @@ if __name__ == '__main__':
                     utils.save_networks(opt, cur_iter, model, best=True)
             visualizer_losses(cur_iter, losses_G_list+losses_D_list)
 
-            # 在每个迭代内部，让Jittor强制回收内存
-            jt.sync_all()
-            jt.gc()
-
+        # 在每个epoch结束后，让Jittor强制同步（！回收内存）
         print(f"{epoch} epoch end~~~~~~")
+        jt.sync_all()
+        jt.gc()
 
     #--- after training ---#
     utils.update_EMA(model, cur_iter, dataloader, opt, force_run_stats=True)

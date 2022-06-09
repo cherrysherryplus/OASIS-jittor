@@ -22,7 +22,9 @@ class losses_computer():
 
     def loss_labelmix(self, mask, output_D_mixed, output_D_fake, output_D_real):
         mixed_D_output = mask*output_D_real+(1-mask)*output_D_fake
-        return self.labelmix_function(mixed_D_output, output_D_mixed)
+        loss = self.labelmix_function(mixed_D_output, output_D_mixed)
+        # print(f"loss labelmix: {loss}")
+        return loss
 
 
 def get_class_balancing(opt, input, label):

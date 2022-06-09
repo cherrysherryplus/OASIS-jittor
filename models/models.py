@@ -22,7 +22,8 @@ class OASIS_model(nn.Module):
             self.netEMA = copy.deepcopy(self.netG) if not opt.no_EMA else None
         self.load_checkpoints()
         if opt.phase == 'train':
-            self.VGG_loss = losses.VGGLoss(self.opt.gpu_ids)
+            if opt.add_vgg_loss:
+                self.VGG_loss = losses.VGGLoss(self.opt.gpu_ids)
 
     def execute(self, image, label, mode, losses_computer):
         if mode == 'losses_G':
@@ -43,7 +44,7 @@ class OASIS_model(nn.Module):
             with jt.no_grad():
                 fake = self.netG(label)
             output_D_fake = self.netD(fake)
-            loss_D_fake = losses_computer.loss(output_D_fake, label, for_real=True)
+            loss_D_fake = losses_computer.loss(output_D_fake, label, for_real=False)
             loss_D += loss_D_fake
             output_D_real = self.netD(image)
             loss_D_real = losses_computer.loss(output_D_real, label, for_real=True)
@@ -58,6 +59,7 @@ class OASIS_model(nn.Module):
             else:
                 loss_D_lm = None
             return loss_D, [loss_D_fake, loss_D_real, loss_D_lm]
+
 
         if mode == 'generate':
             with jt.no_grad():

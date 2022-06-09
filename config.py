@@ -2,6 +2,7 @@ import argparse
 from email.policy import default
 import pickle
 import os
+import shutil
 import utils.utils as utils
 
 
@@ -48,7 +49,7 @@ def add_all_arguments(parser, train):
 
     ## 默认使用batchnorm，因为一般是单卡训练，虽然syncbn的效果更好
     parser.add_argument('--param_free_norm', type=str, default='batch', help='which norm to use in generator before SPADE')
-    parser.add_argument('--norm_mod', type=bool, default=True, help='use SPADE or not(CLADE)')
+    parser.add_argument('--norm_mod', action='store_true', default=False, help='use SPADE or not(CLADE)')
     parser.add_argument('--spade_ks', type=int, default=3, help='kernel size of convs inside SPADE')
     parser.add_argument('--no_EMA', action='store_true', help='if specified, do *not* compute exponential moving averages')
     parser.add_argument('--EMA_decay', type=float, default=0.9999, help='decay in exponential moving averages')
@@ -109,7 +110,10 @@ def set_dataset_default_lm(opt, parser):
 
 def save_options(opt, parser):
     path_name = os.path.join(opt.checkpoints_dir,opt.name)
+    if os.path.exists(path_name):
+        shutil.rmtree(path_name)
     os.makedirs(path_name, exist_ok=True)
+    
     with open(path_name + '/opt.txt', 'wt') as opt_file:
         for k, v in sorted(vars(opt).items()):
             comment = ''

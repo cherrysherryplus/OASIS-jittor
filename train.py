@@ -10,6 +10,9 @@ import config
 #--- read options ---#
 opt = config.read_arguments(train=True)
 
+#--- cuda ---#
+jt.flags.use_cuda = (jt.has_cuda and opt.gpu_ids!="-1")
+
 #--- create utils ---#
 timer = utils.timer(opt)
 visualizer_losses = utils.losses_saver(opt)
@@ -38,14 +41,16 @@ for epoch in range(start_epoch, opt.num_epochs):
         image, label = models.preprocess_input(opt, data_i)
 
         #--- generator update ---#
-        model.netG.zero_grad()
+        # model.netG.zero_grad()
+        optimizerG.zero_grad()
         loss_G, losses_G_list = model(image, label, "losses_G", losses_computer)
         loss_G, losses_G_list = loss_G.mean(), [loss.mean() if loss is not None else None for loss in losses_G_list]
         optimizerG.backward(loss_G)
         optimizerG.step()
 
         #--- discriminator update ---#
-        model.netD.zero_grad()
+        # model.netD.zero_grad()
+        optimizerD.zero_grad()
         loss_D, losses_D_list = model(image, label, "losses_D", losses_computer)
         loss_D, losses_D_list = loss_D.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list]
         optimizerD.backward(loss_D)
