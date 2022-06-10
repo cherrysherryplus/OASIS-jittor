@@ -11,7 +11,6 @@ if __name__ == '__main__':
     #--- read options ---#
     opt = config.read_arguments(train=True)
     opt.dataroot = "./datasets/sample_images"
-    # opt.no_spectral_norm = True
     opt.norm_mod = True
     opt.num_epochs = 2
     # 24g p40 也不能把batch调到 8
@@ -19,6 +18,7 @@ if __name__ == '__main__':
     opt.freq_fid = 4
     opt.freq_print = 1
     # opt.freq_save_loss = 1
+    # opt.no_spectral_norm = True
     
     #--- cuda ---#
     # export JT_SYNC=1

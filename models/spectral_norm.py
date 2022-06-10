@@ -102,7 +102,7 @@ class SpectralNorm:
 
     def __call__(self, module: Module, inputs: Any) -> None:
         # self.compute_weight(module, do_power_iteration=module.is_training())
-        setattr(module, self.name, self.compute_weight(module, do_power_iteration=module.is_training()))
+        setattr(module, self.name, self.compute_weight(module, do_power_iteration=module.is_train))
         # print(module.weight.max(), module.weight.min())
 
     def _solve_v_and_rescale(self, weight_mat, u, target_sigma):
@@ -136,19 +136,39 @@ class SpectralNorm:
             # randomly initialize `u` and `v`
             # u = normalize(weight.new_empty(h).normal_(0, 1), dim=0, eps=fn.eps)
             # v = normalize(weight.new_empty(w).normal_(0, 1), dim=0, eps=fn.eps)
-            u = normalize(jt.randn([h]), dim=0, eps=fn.eps)
-            v = normalize(jt.randn([w]), dim=0, eps=fn.eps)
+            
+            # test
+            import numpy.random as random
+            u_np = random.normal(0, 1, size=[h])
+            v_np = random.normal(0, 1, size=[w])
+            u = normalize(jt.Var(u_np), dim=0, eps=fn.eps)
+            v = normalize(jt.Var(v_np), dim=0, eps=fn.eps)
+            # original
+            # u = normalize(jt.randn([h]), dim=0, eps=fn.eps)
+            # v = normalize(jt.randn([w]), dim=0, eps=fn.eps)
 
         delattr(module, fn.name)
         # module.register_parameter(fn.name + "_orig", weight)
-        setattr(module, fn.name + "_orig", weight)
+
+        # test
+        import numpy.random as random
+        weight_ = random.normal(0, 1, size=weight.shape)
+        setattr(module, fn.name + "_orig", jt.Var(weight_))
+        # original
+        # setattr(module, fn.name + "_orig", weight)
+
         # We still need to assign weight back as fn.name because all sorts of
         # things may assume that it exists, e.g., when initializing weights.
         # However, we can't directly assign as it could be an nn.Parameter and
         # gets added as a parameter. Instead, we register weight.data as a plain
         # attribute.
         # setattr(module, fn.name, weight.data)
-        setattr(module, fn.name, weight)
+        
+        # test
+        setattr(module, fn.name, jt.Var(weight_))
+        # original
+        # setattr(module, fn.name, weight)
+
         # module.register_buffer(fn.name + "_u", u)
         # module.register_buffer(fn.name + "_v", v)
         setattr(module, fn.name + "_u", u)
