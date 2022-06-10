@@ -43,7 +43,7 @@ class OASIS_model(nn.Module):
             with jt.no_grad():
                 fake = self.netG(label)
             output_D_fake = self.netD(fake)
-            loss_D_fake = losses_computer.loss(output_D_fake, label, for_real=True)
+            loss_D_fake = losses_computer.loss(output_D_fake, label, for_real=False)
             loss_D += loss_D_fake
             output_D_real = self.netD(image)
             loss_D_real = losses_computer.loss(output_D_real, label, for_real=True)
@@ -131,6 +131,7 @@ def preprocess_input(opt, data):
     nc = opt.semantic_nc
     # 默认类型就是float32
     input_label = jt.zeros(shape=(bs, nc, h, w))
+
     input_semantics = input_label.scatter_(1, label_map, jt.array(1.0))
     return data['image'], input_semantics
 

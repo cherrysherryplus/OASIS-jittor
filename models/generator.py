@@ -54,7 +54,7 @@ class OASIS_Generator(nn.Module):
             x = self.StripPooling(x)
             # print('x.shape', x.shape)
             x = self.StripPooling2(x)
-            print('x.shape', x.shape)
+            # print('x.shape', x.shape)
             x = self.conv_img_1(nn.leaky_relu(x, 2e-1))
         else:
             x = self.conv_img_2(nn.leaky_relu(x, 2e-1))
@@ -70,6 +70,7 @@ class ResnetBlock_with_SPADE(nn.Module):
         self.learned_shortcut = (fin != fout)
         fmiddle = min(fin, fout)
         sp_norm = norms.get_spectral_norm(opt)
+
         self.conv_0 = sp_norm(nn.Conv2d(fin, fmiddle, kernel_size=3, padding=1))
         self.conv_1 = sp_norm(nn.Conv2d(fmiddle, fout, kernel_size=3, padding=1))
         if self.learned_shortcut:
@@ -78,11 +79,16 @@ class ResnetBlock_with_SPADE(nn.Module):
         spade_conditional_input_dims = opt.semantic_nc
         if not opt.no_3dnoise:
             spade_conditional_input_dims += opt.z_dim
-
-        self.norm_0 = norms.SPADE(opt, fin, spade_conditional_input_dims)
-        self.norm_1 = norms.SPADE(opt, fmiddle, spade_conditional_input_dims)
-        if self.learned_shortcut:
-            self.norm_s = norms.SPADE(opt, fin, spade_conditional_input_dims)
+        if opt.norm_mod:
+            self.norm_0 = norms.SPADE(opt, fin, spade_conditional_input_dims)
+            self.norm_1 = norms.SPADE(opt, fmiddle, spade_conditional_input_dims)
+            if self.learned_shortcut:
+                self.norm_s = norms.SPADE(opt, fin, spade_conditional_input_dims)
+        else:
+            self.norm_0 = norms.SPADELight(opt, fin, spade_conditional_input_dims)
+            self.norm_1 = norms.SPADELight(opt, fmiddle, spade_conditional_input_dims)
+            if self.learned_shortcut:
+                self.norm_s = norms.SPADELight(opt, fin, spade_conditional_input_dims)
         self.activ = nn.LeakyReLU(0.2)
 
     def execute(self, x, seg):

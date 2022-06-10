@@ -86,6 +86,8 @@ class LandscapeDataset(dataset.Dataset):
         label = transform.to_tensor(label)
         image = jittor.float32(image)
         label = jittor.float32(label)
+        # print(label)
+        # print(image.shape)
         # print('原始数据label:',label)
         # normalize（只有图片要规范化）
         image = transform.image_normalize(image, [0.5], [0.5])
