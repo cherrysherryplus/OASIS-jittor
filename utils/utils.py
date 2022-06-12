@@ -11,8 +11,9 @@ from PIL import Image
 # 设置随机数种子(python numpy jittor cupy)
 # https://cg.cs.tsinghua.edu.cn/jittor/assets/docs/_modules/jittor/misc.html#set_global_seed
 def fix_seed(seed):
-    random.seed(seed)
     jt.set_global_seed(seed)
+    # 下面两行可以不要
+    random.seed(seed)
     np.random.seed(seed)
 
 

@@ -58,8 +58,6 @@ if __name__ == '__main__':
             
             #--- generator update ---#
             # jittor不会累积梯度
-            # model.netG.zero_grad()
-
             loss_G, losses_G_list = model(image, label, "losses_G", losses_computer)
             loss_G, losses_G_list = loss_G.mean(), [loss.mean() if loss is not None else None for loss in losses_G_list]
             optimizerG.zero_grad()
@@ -68,7 +66,6 @@ if __name__ == '__main__':
             # print(optimizerG.param_groups[0]['grads'][0].sum())
 
             #--- discriminator update ---#
-            # model.netD.zero_grad()
             loss_D, losses_D_list = model(image, label, "losses_D", losses_computer)
             loss_D, losses_D_list = loss_D.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list]
             optimizerD.step(loss_D)

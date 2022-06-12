@@ -139,7 +139,12 @@ def generate_labelmix(opt, label, fake_image, real_image):
     target_map, _ = jt.argmax(label, dim=1, keepdims=True)
     all_classes = jt.unique(target_map)
     for c in all_classes:
-        mask = jt.randint(0, 2, (1,))
+        # test
+        import numpy as np
+        mask_np = np.random.randint(0, 2, (1,))
+        mask = jt.Var(mask_np)
+        # original
+        # mask = jt.randint(0, 2, (1,))
         target_map[target_map == c] = mask
     target_map = target_map.float()
     mixed_image = target_map * real_image + (1 - target_map) * fake_image
