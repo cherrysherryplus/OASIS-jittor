@@ -13,8 +13,8 @@ from PIL import Image
 def fix_seed(seed):
     jt.set_global_seed(seed)
     # 下面两行可以不要
-    random.seed(seed)
-    np.random.seed(seed)
+    # random.seed(seed)
+    # np.random.seed(seed)
 
 
 # 计算开始的epoch和iter

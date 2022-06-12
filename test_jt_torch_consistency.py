@@ -64,10 +64,12 @@ def init_networks(networks):
 
 if __name__ == "__main__":
     opt = config.read_arguments(train=True)
-    print(np.random.randint(0,5, size=(2,2)))
+    print(np.random.randint(0,5, size=(3,3)))
 
     # jittor
     opt.dataroot = "./datasets/sample_images"
+
+    opt.seed = 0
 
     opt.num_epochs = 2
     opt.batch_size = 1
@@ -80,8 +82,11 @@ if __name__ == "__main__":
     # opt.no_spectral_norm = True
 
     jt.flags.use_cuda = (jt.has_cuda and opt.gpu_ids!="-1")
+    # able eager mode
+    jt.lazy_execution = 0
 
     dataloader, dataloader_val = dataloaders.get_dataloaders(opt)
+    losses_computer = losses.losses_computer(opt)
 
     netG = generators.OASIS_Generator(opt)
     netG.train()
@@ -89,10 +94,30 @@ if __name__ == "__main__":
     netD.train()
     init_networks([netG,netD])
 
+    # optim
+    optimizerG = jt.optim.Adam(netG.parameters(), lr=opt.lr_g, betas=(opt.beta1, opt.beta2))
+    optimizerD = jt.optim.Adam(netD.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2)) 
+
     for i, data_i in enumerate(dataloader):
         image, label = models.preprocess_input(opt, data_i)
         fake = netG(label)
         print(fake.max(), fake.min())
+        output_D = netD(fake)
+        print(output_D.max(), output_D.min())
+        # loss
+        loss_G = 0
+        loss_G_adv = losses_computer.loss(output_D, label, for_real=True)
+        loss_G += loss_G_adv
+        loss_G_vgg = None
+        loss_G, losses_G_list = loss_G.mean(), [loss.mean() if loss is not None else None for loss in [loss_G_adv, loss_G_vgg]]
+        print(losses_G_list)
+        # backward
+        optimizerG.zero_grad()
+        optimizerG.backward(loss_G)
+        print("stop here to see weight changes")
+        optimizerG.step()
+
+
 
 '''# jittor
 conv = jt.nn.Conv2d(3, 32, kernel_size=3, padding=1)
