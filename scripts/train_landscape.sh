@@ -14,7 +14,7 @@ python train.py --name oasis_landscape --dataset_mode landscape --gpu_ids 0 \
 --dataroot ./datasets/landscape --batch_size 8 --num_epochs 200 --no_3dnoise \
 --freq_print 400 --freq_save_latest 800 --freq_save_ckpt 4000 \
 --freq_smooth_loss 40 --freq_save_loss 400 \
---freq_fid 800 \
+--freq_fid 400 \
 --param_free_norm batch \
 --norm_mod \
 # --no_spectral_norm

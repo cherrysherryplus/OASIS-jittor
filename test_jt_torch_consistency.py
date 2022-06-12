@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
     jt.flags.use_cuda = (jt.has_cuda and opt.gpu_ids!="-1")
     # able eager mode
-    jt.lazy_execution = 0
+    # jt.lazy_execution = 0
 
     dataloader, dataloader_val = dataloaders.get_dataloaders(opt)
     losses_computer = losses.losses_computer(opt)
@@ -114,9 +114,8 @@ if __name__ == "__main__":
         # backward
         optimizerG.zero_grad()
         optimizerG.backward(loss_G)
-        print("stop here to see weight changes")
         optimizerG.step()
-
+        print("stop here to see weight changes")
 
 
 '''# jittor
