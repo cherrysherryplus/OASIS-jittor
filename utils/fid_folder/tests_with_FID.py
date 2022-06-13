@@ -40,7 +40,6 @@ import numpy as np
 import jittor as jt
 from scipy import linalg
 from imageio import imread
-import imageio
 from jittor.nn import AdaptiveAvgPool2d
 from skimage.transform import resize
 import matplotlib.pyplot as plt

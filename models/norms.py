@@ -146,7 +146,7 @@ class ClassAffine(nn.Module):
 
     def execute(self, input, mask, input_dist=None):
         # class_weight, class_bias = self.affine_gather(input, mask)
-        # class_weight, class_bias = self.affine_einsum(mask)
+        # class_weight, class_bias = self.affine_einsum(mask) 
         class_weight, class_bias = self.affine_embed(mask)
         # if self.add_dist:
         #     input_dist = nn.interpolate(input_dist, size=input.size()[2:], mode='nearest')

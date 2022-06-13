@@ -14,17 +14,17 @@ class losses_computer():
         #--- n+1 loss ---
         target = get_n1_target(self.opt, input, label, for_real)
         loss = nn.cross_entropy_loss(input, target, reduction='none')
-
         if for_real:
             loss = jt.mean(loss * weight_map[:, 0, :, :])
         else:
             loss = jt.mean(loss)
         return loss
 
-
     def loss_labelmix(self, mask, output_D_mixed, output_D_fake, output_D_real):
         mixed_D_output = mask*output_D_real+(1-mask)*output_D_fake
-        return self.labelmix_function(mixed_D_output, output_D_mixed)
+        loss = self.labelmix_function(mixed_D_output, output_D_mixed)
+        # print(f"loss labelmix: {loss}")
+        return loss
 
 
 def get_class_balancing(opt, input, label):
@@ -38,7 +38,6 @@ def get_class_balancing(opt, input, label):
         if opt.contain_dontcare_label:
             coefficients[0] = 0
         weight_map = coefficients[integers]
-        # print('weight_map',weight_map)
     else:
         weight_map = jt.ones_like(input[:, :, :, :])
     return weight_map
@@ -58,14 +57,14 @@ def get_target_tensor(opt, input, target_is_real):
     with jt.no_grad():
         if opt.gpu_ids != "-1":
             if target_is_real:
-                return jt.float32(1.0).expand_as(input)
+                return jt.float32(1).expand_as(input)
             else:
-                return jt.float32(0.0).expand_as(input)
+                return jt.float32(0).expand_as(input)
         else:
             if target_is_real:
-                return jt.float32(1.0).expand_as(input)
+                return jt.float32(1).expand_as(input)
             else:
-                return jt.float32(0.0).expand_as(input)
+                return jt.float32(0).expand_as(input)
 
 
 class VGGLoss(nn.Module):

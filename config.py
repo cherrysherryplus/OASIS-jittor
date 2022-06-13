@@ -26,32 +26,41 @@ def read_arguments(train=True):
 
 
 def add_all_arguments(parser, train):
-    #--- general options ---
-    parser.add_argument('--name', type=str, default='label_landscape', help='name of the experiment. It decides where to store samples and models')
+    # --- general options ---
+    parser.add_argument('--name', type=str, default='label_landscape4_with_reduceD',
+                        help='name of the experiment. It decides where to store samples and models')
     parser.add_argument('--seed', type=int, default=42, help='random seed')
     ## gpu_ids
     parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
 
-    parser.add_argument('--checkpoints_dir', type=str, default='./checkpoints', help='models are saved here')
-    parser.add_argument('--no_spectral_norm', action='store_true',default=False, help='this option deactivates spectral norm in all layers')
-    parser.add_argument('--batch_size', type=int, default=1, help='input batch size')
+    parser.add_argument('--checkpoints_dir', type=str, default='/root/autodl-tmp/checkpoints', help='models are saved here')
+    parser.add_argument('--no_spectral_norm', action='store_true', default=False,
+                        help='this option deactivates spectral norm in all layers')
+    parser.add_argument('--batch_size', type=int, default=2, help='input batch size')
 
     ## 默认使用计图的数据集 landscape
-    parser.add_argument('--dataroot', type=str, default='/home/oasis_jittor/models/Sample-And-Split-main/landscape_subset', help='path to dataset root')
-    parser.add_argument('--dataset_mode', type=str, default='landscape', help='this option indicates which dataset should be loaded')
-    
-    parser.add_argument('--no_flip', action='store_true', help='if specified, do not flip the images for data argumentation')
+    parser.add_argument('--dataroot', type=str,
+                        default='/root/autodl-tmp/landscape_subset',
+                        help='path to dataset root')
+    parser.add_argument('--dataset_mode', type=str, default='landscape',
+                        help='this option indicates which dataset should be loaded')
+
+    parser.add_argument('--no_flip', action='store_true',
+                        help='if specified, do not flip the images for data argumentation')
 
     # for generator
     parser.add_argument('--num_res_blocks', type=int, default=6, help='number of residual blocks in G and D')
     parser.add_argument('--channels_G', type=int, default=64, help='# of gen filters in first conv layer in generator')
 
     ## 默认使用batchnorm，因为一般是单卡训练，虽然syncbn的效果更好
-    parser.add_argument('--param_free_norm', type=str, default='batch', help='which norm to use in generator before SPADE')
+    parser.add_argument('--param_free_norm', type=str, default='batch',
+                        help='which norm to use in generator before SPADE')
     parser.add_argument('--spade_ks', type=int, default=3, help='kernel size of convs inside SPADE')
-    parser.add_argument('--no_EMA', action='store_true', help='if specified, do *not* compute exponential moving averages')
+    parser.add_argument('--no_EMA', action='store_true',
+                        help='if specified, do *not* compute exponential moving averages')
     parser.add_argument('--EMA_decay', type=float, default=0.9999, help='decay in exponential moving averages')
-    parser.add_argument('--no_3dnoise', action='store_true', default=False, help='if specified, do *not* concatenate noise to label maps')
+    parser.add_argument('--no_3dnoise', action='store_true', default=False,
+                        help='if specified, do *not* concatenate noise to label maps')
     parser.add_argument('--z_dim', type=int, default=64, help="dimension of the latent z vector")
     parser.add_argument('--use_DPM', action='store_true', default=True,
                         help='whether to use double pooling module')
@@ -64,8 +73,8 @@ def add_all_arguments(parser, train):
         parser.add_argument('--freq_save_ckpt', type=int, default=20000, help='frequency of saving the checkpoints')
         parser.add_argument('--freq_save_latest', type=int, default=10000, help='frequency of saving the latest model')
         parser.add_argument('--freq_smooth_loss', type=int, default=250, help='smoothing window for loss visualization')
-        parser.add_argument('--freq_save_loss', type=int, default=2500, help='frequency of loss plot updates')
-        parser.add_argument('--freq_fid', type=int, default=800, help='frequency of saving the fid score (in training iterations)')
+        parser.add_argument('--freq_save_loss', type=int, default=1000, help='frequency of loss plot updates')
+        parser.add_argument('--freq_fid', type=int, default=100, help='frequency of saving the fid score (in training iterations)')
         parser.add_argument('--continue_train', action='store_true', help='resume previously interrupted training')
         parser.add_argument('--which_iter', type=str, default='latest', help='which epoch to load when continue_train')
         parser.add_argument('--num_epochs', type=int, default=200, help='number of epochs to train')
@@ -74,19 +83,25 @@ def add_all_arguments(parser, train):
         parser.add_argument('--lr_g', type=float, default=0.0001, help='G learning rate, default=0.0001')
         parser.add_argument('--lr_d', type=float, default=0.0004, help='D learning rate, default=0.0004')
 
-        parser.add_argument('--channels_D', type=int, default=64, help='# of discrim filters in first conv layer in discriminator')
-        parser.add_argument('--add_vgg_loss', action='store_true',default=True, help='if specified, add VGG feature matching loss')
+        parser.add_argument('--channels_D', type=int, default=64,
+                            help='# of discrim filters in first conv layer in discriminator')
+        parser.add_argument('--add_vgg_loss', action='store_true', default=False,
+                            help='if specified, add VGG feature matching loss')
         parser.add_argument('--lambda_vgg', type=float, default=10.0, help='weight for VGG loss')
-        parser.add_argument('--no_balancing_inloss', action='store_true', default=False, help='if specified, do *not* use class balancing in the loss function')
-        parser.add_argument('--no_labelmix', action='store_true', default=False, help='if specified, do *not* use LabelMix')
+        parser.add_argument('--no_balancing_inloss', action='store_true', default=False,
+                            help='if specified, do *not* use class balancing in the loss function')
+        parser.add_argument('--no_labelmix', action='store_true', default=False,
+                            help='if specified, do *not* use LabelMix')
         parser.add_argument('--lambda_labelmix', type=float, default=10.0, help='weight for LabelMix regularization')
 
-        parser.add_argument('--use_fid_inception', action='store_true', default=False, help='if specified, use fid inception instead of normal inception v3')
+        parser.add_argument('--use_fid_inception', action='store_true', default=False,
+                            help='if specified, use fid inception instead of normal inception v3')
     else:
         parser.add_argument('--results_dir', type=str, default='./results/', help='saves testing results here.')
         parser.add_argument('--ckpt_iter', type=str, default='best', help='which epoch to load to evaluate a model')
         # test_only在正式测试时使用，表示使用A榜评测数据进行测试，而不是使用划分的验证集进行验证
-        parser.add_argument('--test_only', action='store_true', default=False, help='if specified, load dataset specified for test')
+        parser.add_argument('--test_only', action='store_true', default=False,
+                            help='if specified, load dataset specified for test')
     return parser
 
 
@@ -111,7 +126,7 @@ def set_dataset_default_lm(opt, parser):
 
 
 def save_options(opt, parser):
-    path_name = os.path.join(opt.checkpoints_dir,opt.name)
+    path_name = os.path.join(opt.checkpoints_dir, opt.name)
     os.makedirs(path_name, exist_ok=True)
     with open(path_name + '/opt.txt', 'wt') as opt_file:
         for k, v in sorted(vars(opt).items()):

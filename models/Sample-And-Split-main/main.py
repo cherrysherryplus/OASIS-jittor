@@ -15,7 +15,7 @@ def main():
     # -------------------------------------
     # 设置随机数种子
     # -------------------------------------
-    random.seed(0)
+    random.seed(10)
     
     # -------------------------------------
     # 子集数量
@@ -74,7 +74,7 @@ def main():
     # -------------------------------------
     val_num = 200
     dataset_root = Path("/root/autodl-tmp/landscape")
-    subset_root = Path("landscape_subset")
+    subset_root = Path("/root/autodl-tmp/landscape_subset")
     create_subset(dataset_root, subset_root, filenames, subset)
     split_train_val(subset_root, val_num)
 

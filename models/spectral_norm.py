@@ -1,6 +1,7 @@
-import jittor
+import jittor as jt
 from jittor.misc import normalize
 from typing import Any, Optional, TypeVar
+import jittor.nn as nn
 from jittor.nn import Module
 
 
@@ -28,7 +29,7 @@ class SpectralNorm:
         self.n_power_iterations = n_power_iterations
         self.eps = eps
 
-    def reshape_weight_to_matrix(self, weight: jittor.Var) -> jittor.Var:
+    def reshape_weight_to_matrix(self, weight: jt.Var) -> jt.Var:
         weight_mat = weight
         if self.dim != 0:
             # permute dim to front
@@ -37,7 +38,7 @@ class SpectralNorm:
         height = weight_mat.size(0)
         return weight_mat.reshape(height, -1)
 
-    def compute_weight(self, module: Module, do_power_iteration: bool) -> jittor.Var:
+    def compute_weight(self, module: Module, do_power_iteration: bool) -> jt.Var:
         # NB: If `do_power_iteration` is set, the `u` and `v` vectors are
         #     updated in power iteration **in-place**. This is very important
         #     because in `DataParallel` forward, the vectors (being buffers) are
@@ -73,43 +74,44 @@ class SpectralNorm:
         weight_mat = self.reshape_weight_to_matrix(weight)
 
         if do_power_iteration:
-            with jittor.no_grad():
+            with jt.no_grad():
                 for _ in range(self.n_power_iterations):
                     # Spectral norm of weight equals to `u^T W v`, where `u` and `v`
                     # are the first left and right singular vectors.
                     # This power iteration produces approximations of `u` and `v`.
-                    v = normalize(jittor.nn.matmul(weight_mat.t(), u), dim=0, eps=self.eps)
-                    u = normalize(jittor.nn.matmul(weight_mat, v), dim=0, eps=self.eps)
+                    v = normalize(nn.matmul(weight_mat.t(), u), dim=0, eps=self.eps)
+                    u = normalize(nn.matmul(weight_mat, v), dim=0, eps=self.eps)
                 if self.n_power_iterations > 0:
                     # See above on why we need to clone
                     u = u.clone()
                     v = v.clone()
 
-        sigma = jittor.matmul(u, jittor.matmul(weight_mat, v))
+        sigma = jt.matmul(u, jt.matmul(weight_mat, v))
         weight = weight / sigma
         return weight
 
     def remove(self, module: Module) -> None:
-        with jittor.no_grad():
+        with jt.no_grad():
             weight = self.compute_weight(module, do_power_iteration=False)
         delattr(module, self.name)
         delattr(module, self.name + '_u')
         delattr(module, self.name + '_v')
         delattr(module, self.name + '_orig')
-        # module.register_parameter(self.name, jittor.Var(weight.detach()))
-        setattr(module, self.name, jittor.Var(weight.detach()))
+        # module.register_parameter(self.name, jt.Var(weight.detach()))
+        setattr(module, self.name, jt.Var(weight.detach()))
 
     def __call__(self, module: Module, inputs: Any) -> None:
-        self.compute_weight(module, do_power_iteration=module.is_training())
-        # setattr(module, self.name, self.compute_weight(module, do_power_iteration=module.training))
+        # self.compute_weight(module, do_power_iteration=module.is_training())
+        setattr(module, self.name, self.compute_weight(module, do_power_iteration=module.is_training()))
+        # print(module.weight.max(), module.weight.min())
 
     def _solve_v_and_rescale(self, weight_mat, u, target_sigma):
         # Tries to returns a vector `v` s.t. `u = normalize(W @ v)`
         # (the invariant at top of this class) and `u @ W @ v = sigma`.
         # This uses pinverse in case W^T W is not invertible.
         # v = torch.linalg.multi_dot([weight_mat.t().mm(weight_mat).pinverse(), weight_mat.t(), u.unsqueeze(1)]).squeeze(1)
-        v = jittor.matmul(jittor.matmul(weight_mat.t().mm(weight_mat).pinverse(), jittor.matmul(weight_mat.t(), u.unsqueeze(1)))).squeeze(1)
-        return v.mul_(target_sigma / jittor.matmul(u, jittor.matmul(weight_mat, v)))
+        v = jt.matmul(jt.matmul(weight_mat.t().mm(weight_mat).pinverse(), jt.matmul(weight_mat.t(), u.unsqueeze(1)))).squeeze(1)
+        return v.mul_(target_sigma / jt.matmul(u, jt.matmul(weight_mat, v)))
 
     @staticmethod
     def apply(module: Module, name: str, n_power_iterations: int, dim: int, eps: float) -> 'SpectralNorm':
@@ -127,15 +129,15 @@ class SpectralNorm:
         #         'The module passed to `SpectralNorm` can\'t have uninitialized parameters. '
         #         'Make sure to run the dummy forward before applying spectral normalization')
 
-        with jittor.no_grad():
+        with jt.no_grad():
             weight_mat = fn.reshape_weight_to_matrix(weight)
 
             h, w = weight_mat.size()
             # randomly initialize `u` and `v`
             # u = normalize(weight.new_empty(h).normal_(0, 1), dim=0, eps=fn.eps)
             # v = normalize(weight.new_empty(w).normal_(0, 1), dim=0, eps=fn.eps)
-            u = normalize(jittor.randn([h]), dim=0, eps=fn.eps)
-            v = normalize(jittor.randn([w]), dim=0, eps=fn.eps)
+            u = normalize(jt.randn([h]), dim=0, eps=fn.eps)
+            v = normalize(jt.randn([w]), dim=0, eps=fn.eps)
 
         delattr(module, fn.name)
         # module.register_parameter(fn.name + "_orig", weight)
@@ -195,7 +197,7 @@ class SpectralNorm:
 #                         missing_keys.append(key)
 #             if has_missing_keys:
 #                 return
-#             with jittor.no_grad():
+#             with jt.no_grad():
 #                 weight_orig = state_dict[weight_key + '_orig']
 #                 weight = state_dict.pop(weight_key)
 #                 sigma = (weight_orig / weight).mean()
@@ -278,8 +280,8 @@ def spectral_norm(module: T_module,
 
     """
     if dim is None:
-        if isinstance(module, (jittor.nn.ConvTranspose,
-                               jittor.nn.ConvTranspose3d)):
+        if isinstance(module, (nn.ConvTranspose,
+                               nn.ConvTranspose3d)):
             dim = 1
         else:
             dim = 0

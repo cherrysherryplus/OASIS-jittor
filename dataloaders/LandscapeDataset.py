@@ -1,7 +1,5 @@
 import random
-
-import jittor
-from jittor import dataset,transform
+from jittor import dataset, transform
 import os
 import os.path as osp
 from PIL import Image
@@ -11,7 +9,7 @@ class LandscapeDataset(dataset.Dataset):
     # 原图大小是768 * 1024；load_size=512相当于读入低分辨率的原图像；load_size=1024相当于读入正常分辨率的图像
     def __init__(self, opt, for_metrics):
         super(LandscapeDataset, self).__init__()
-        
+
         # test low resolution 192*256
         opt.load_size = 256
         opt.crop_size = 256
@@ -20,7 +18,7 @@ class LandscapeDataset(dataset.Dataset):
         # TODO 先改为False，如果有需要再改回来
         opt.contain_dontcare_label = False
         # TODO contain_dontcare_label为False，semantic_nc就不用加一
-        opt.semantic_nc = 29 # label_nc + unknown
+        opt.semantic_nc = 29  # label_nc + unknown
         opt.cache_filelist_read = False
         opt.cache_filelist_write = False
         # 宽高比：4:3
@@ -32,8 +30,7 @@ class LandscapeDataset(dataset.Dataset):
 
         # 计图中，__len__默认返回的是分批后的iter次数，即融合了torch DataLoader的功能；
         # 另外，使用total_len属性，表示数据集的真实大小
-        self.set_attrs(**{"total_len":len(self.images)})
-
+        self.set_attrs(**{"total_len": len(self.images)})
 
     def __getitem__(self, idx):
         image = Image.open(os.path.join(self.paths[0], self.images[idx])).convert('RGB')
@@ -41,8 +38,7 @@ class LandscapeDataset(dataset.Dataset):
         image, label = self.transforms(image, label)
         label = label * 255
         return {"image": image, "label": label, "name": self.images[idx]}
-        
-        
+
     # landscape数据集里面，没有划分验证集，这里暂时也不显式地从训练集划分出验证集；
     # 直接用train来训练，用val（A榜评测数据集）来测试。
     def list_images(self):
@@ -54,21 +50,21 @@ class LandscapeDataset(dataset.Dataset):
         path_img = os.path.join(self.opt.dataroot, mode, "imgs")
         for item in sorted(os.listdir(path_img)):
             images.append(item)
-            
+
         labels = []
         path_lab = os.path.join(self.opt.dataroot, mode, "labels")
         for item in sorted(os.listdir(path_lab)):
             labels.append(item)
 
         # sanity check（完整性检查）
-        assert len(images)  == len(labels), "different len of images and labels %s - %s" % (len(images), len(labels))
+        assert len(images) == len(labels), "different len of images and labels %s - %s" % (len(images), len(labels))
         for i in range(len(images)):
-            image_name, label_name = os.path.splitext(osp.split(images[i])[1])[0], os.path.splitext(osp.split(labels[i])[1])[0]
-            assert image_name == label_name,\
+            image_name, label_name = os.path.splitext(osp.split(images[i])[1])[0], \
+                                     os.path.splitext(osp.split(labels[i])[1])[0]
+            assert image_name == label_name, \
                 '%s and %s are not matching' % (images[i], labels[i])
-                
-        return images, labels, (path_img, path_lab)
 
+        return images, labels, (path_img, path_lab)
 
     def transforms(self, image, label):
         assert image.size == label.size
@@ -82,13 +78,10 @@ class LandscapeDataset(dataset.Dataset):
                 image = transform.hflip(image)
                 label = transform.hflip(label)
         # to tensor（像RGB mode下的PIL.Image对象，会转换为FloatTensor，同时会缩放到[0,1.0]，所以后续label会乘上255）
-        image = transform.to_tensor(image)
-        label = transform.to_tensor(label)
-        image = jittor.float32(image)
-        label = jittor.float32(label)
-        # print(label)
-        # print(image.shape)
-        # print('原始数据label:',label)
         # normalize（只有图片要规范化）
-        image = transform.image_normalize(image, [0.5], [0.5])
+        # image = transform.to_tensor(image) （二者选一即可，to_tensor和image_normalize/ImageNormalize）
+        # image = transform.image_normalize(image, [0.5], [0.5])
+        image = transform.to_tensor(image)
+        image = transform.ImageNormalize([0.5], [0.5])(image)
+        label = transform.to_tensor(label)
         return image, label

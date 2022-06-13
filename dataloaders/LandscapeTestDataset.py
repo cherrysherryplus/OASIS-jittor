@@ -62,4 +62,3 @@ class LandscapeTestDataset(dataset.Dataset):
         # to tensor（像RGB mode下的PIL.Image对象，会转换为FloatTensor，同时会缩放到[0,1.0]，所以后续label会乘上255；注意RGBA mode的Image对象，会直接转换为IntTensor或int32类型）
         label = TR.to_tensor(label)
         return image, label
-
