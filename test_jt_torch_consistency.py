@@ -1,5 +1,5 @@
 from models.spectral_norm import spectral_norm as jt_spnorm
-import torch.nn.utils.spectral_norm as torch_spnorm
+# import torch.nn.utils.spectral_norm as torch_spnorm
 
 import numpy as np
 import math
@@ -13,6 +13,8 @@ import dataloaders.dataloaders as dataloaders
 # import utils.utils as utils
 # from utils.fid_scores import fid_jittor
 import config
+import utils.utils as utils
+
 
 def get_numpy_weight(initialization, out_dim, in_dim):
     if initialization == 'zeros':
@@ -49,13 +51,13 @@ def init_networks(networks):
             if hasattr(m, 'weight') and isinstance(m.weight, jt.Var):
                 data = get_numpy_weight("normal", m.weight.shape[2], m.weight.shape[3])
                 weight = jt.Var(data[0].astype(np.float32))
-                m.weight = weight.expand_as(m.weight)
+                m.weight.data = weight.expand_as(m.weight).data
             if hasattr(m, 'bias') and isinstance(m.weight, jt.Var):
                 init.constant_(m.bias, 0.0)
         elif hasattr(m, 'weight') and (classname.find('Conv') != -1 or classname.find('Linear') != -1):
             data = get_numpy_weight("xavier_normal", m.weight.shape[2], m.weight.shape[3])
             weight = jt.Var(data[0].astype(np.float32))
-            m.weight = weight.expand_as(m.weight)
+            m.weight.data = weight.expand_as(m.weight).data
             if hasattr(m, 'bias') and m.bias is not None:
                 init.constant_(m.bias, 0.0)
     for net in networks:
@@ -68,9 +70,6 @@ if __name__ == "__main__":
 
     # jittor
     opt.dataroot = "./datasets/sample_images"
-
-    opt.seed = 0
-
     opt.num_epochs = 2
     opt.batch_size = 1
     opt.freq_fid = 4
@@ -92,6 +91,8 @@ if __name__ == "__main__":
     netG.train()
     netD = discriminators.OASIS_Discriminator(opt)
     netD.train()
+    # fix seed again
+    utils.fix_seed(opt.seed)
     init_networks([netG,netD])
 
     # optim
