@@ -10,14 +10,18 @@
 # --which_iter latest
 
 # 子集：train 3200 验证 200 测试 1000
-python train.py --name oasis_landscape --dataset_mode landscape --gpu_ids 0 \
---dataroot ./datasets/landscape --batch_size 8 --num_epochs 200 --no_3dnoise \
+# freq_smooth_loss 40->80
+python train.py \
+--seed 20220617 \
+--name oasis_landscape \
+--dataset_mode landscape \
+--dataroot ./datasets/landscape --batch_size 8 --num_epochs 200 \
 --freq_print 400 --freq_save_latest 800 --freq_save_ckpt 4000 \
---freq_smooth_loss 40 --freq_save_loss 400 \
+--freq_smooth_loss 80 --freq_save_loss 400 \
 --freq_fid 400 \
 --param_free_norm batch \
+--no_3dnoise \
 --norm_mod \
-# --no_spectral_norm
 
 # --continue_train \
 # --which_iter latest

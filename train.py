@@ -23,6 +23,7 @@ fid_computer = fid_jittor(opt, dataloader_val)
 
 #--- create models ---#
 model = models.OASIS_model(opt)
+model.train()
 
 #--- create optimizers ---#
 optimizerG = jt.optim.Adam(model.netG.parameters(), lr=opt.lr_g, betas=(opt.beta1, opt.beta2))
@@ -37,7 +38,7 @@ for epoch in range(start_epoch, opt.num_epochs):
             continue
         already_started = True
         cur_iter = epoch*len(dataloader) + i
-        # print(cur_iter)
+        print(cur_iter)
         image, label = models.preprocess_input(opt, data_i)
 
         #--- generator update ---#
@@ -67,11 +68,18 @@ for epoch in range(start_epoch, opt.num_epochs):
         if cur_iter % opt.freq_save_latest == 0:
             utils.save_networks(opt, cur_iter, model, latest=True)
         if cur_iter % opt.freq_fid == 0 and cur_iter > 0:
+            # This operation offen used between train and eval.
+            jt.clean_graph() 
             is_best = fid_computer.update(model, cur_iter)
             if is_best:
                 utils.save_networks(opt, cur_iter, model, best=True)
+            jt.gc()
         visualizer_losses(cur_iter, losses_G_list+losses_D_list)
+    
     print("one epoch end~~~~~~")
+    jt.sync_all()
+    jt.gc()
+
 
 #--- after training ---#
 utils.update_EMA(model, cur_iter, dataloader, opt, force_run_stats=True)

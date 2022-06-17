@@ -221,12 +221,14 @@ class image_saver():
 def tens_to_im(tens):
     out = (tens + 1) / 2
     out.clamp(0, 1)
-    return np.transpose(out.detach().numpy(), (1, 2, 0))
+    # return np.transpose(out.detach().numpy(), (1, 2, 0))
+    return np.transpose(out.numpy(), (1, 2, 0))
 
 
 def tens_to_lab(tens, num_cl):
     label_tensor = Colorize(tens, num_cl)
-    label_numpy = np.transpose(label_tensor.data, (1, 2, 0))
+    # label_numpy = np.transpose(label_tensor.data, (1, 2, 0))
+    label_numpy = np.transpose(label_tensor.numpy(), (1, 2, 0))
     return label_numpy
 
 

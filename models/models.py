@@ -16,14 +16,14 @@ class OASIS_model(nn.Module):
         self.netG = generators.OASIS_Generator(opt)
         if opt.phase == 'train':
             self.netD = discriminators.OASIS_Discriminator(opt)
+            if opt.add_vgg_loss:
+                self.VGG_loss = losses.VGGLoss(self.opt.gpu_ids)
         self.print_parameter_count()
         self.init_networks()
         with jt.no_grad():
             self.netEMA = copy.deepcopy(self.netG) if not opt.no_EMA else None
         self.load_checkpoints()
-        if opt.phase == 'train':
-            if opt.add_vgg_loss:
-                self.VGG_loss = losses.VGGLoss(self.opt.gpu_ids)
+
 
     def execute(self, image, label, mode, losses_computer):
         if mode == 'losses_G':

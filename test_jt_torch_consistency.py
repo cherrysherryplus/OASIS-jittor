@@ -7,6 +7,7 @@ import jittor as jt
 import jittor.init as init
 import models.losses as losses
 import models.models as models
+from models.models import generate_labelmix
 import models.generator as generators
 import models.discriminator as discriminators
 import dataloaders.dataloaders as dataloaders
@@ -69,15 +70,15 @@ if __name__ == "__main__":
     print(np.random.randint(0,5, size=(3,3)))
 
     # jittor
-    opt.dataroot = "./datasets/sample_images"
+    opt.dataroot = "./datasets/landscape"
     opt.num_epochs = 2
-    opt.batch_size = 1
+    opt.batch_size = 4
     opt.freq_fid = 4
     opt.freq_print = 1
 
     opt.norm_mod = True
     opt.no_3dnoise = True
-    opt.no_labelmix = True
+    # opt.no_labelmix = True
     # opt.no_spectral_norm = True
 
     jt.flags.use_cuda = (jt.has_cuda and opt.gpu_ids!="-1")
@@ -102,9 +103,7 @@ if __name__ == "__main__":
     for i, data_i in enumerate(dataloader):
         image, label = models.preprocess_input(opt, data_i)
         fake = netG(label)
-        print(fake.max(), fake.min())
         output_D = netD(fake)
-        print(output_D.max(), output_D.min())
         # loss
         loss_G = 0
         loss_G_adv = losses_computer.loss(output_D, label, for_real=True)
@@ -116,7 +115,32 @@ if __name__ == "__main__":
         optimizerG.zero_grad()
         optimizerG.backward(loss_G)
         optimizerG.step()
-        print("stop here to see weight changes")
+
+        loss_D = 0
+        with jt.no_grad():
+            fake = netG(label)
+        output_D_fake = netD(fake)
+        loss_D_fake = losses_computer.loss(output_D_fake, label, for_real=False)
+        loss_D += loss_D_fake
+        output_D_real = netD(image)
+        loss_D_real = losses_computer.loss(output_D_real, label, for_real=True)
+        loss_D += loss_D_real
+        if not opt.no_labelmix:
+            mixed_inp, mask = generate_labelmix(opt, label, fake, image)
+            output_D_mixed = netD(mixed_inp)
+            loss_D_lm = opt.lambda_labelmix * losses_computer.loss_labelmix(mask, output_D_mixed,
+                                                                                    output_D_fake,
+                                                                                    output_D_real)
+            loss_D += loss_D_lm
+        else:
+            loss_D_lm = None
+        loss_D, losses_D_list = loss_D, [loss_D_fake, loss_D_real, loss_D_lm]
+        loss_D, losses_D_list = loss_D.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list]
+        print(losses_D_list)
+        # backward
+        optimizerD.zero_grad()
+        optimizerD.backward(loss_G)
+        optimizerD.step()
 
 
 '''# jittor
