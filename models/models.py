@@ -9,6 +9,17 @@ import numpy as np
 import models.losses as losses
 
 
+def weights_init_normal(m):
+    classname = m.__class__.__name__
+    if classname.find("Conv") != -1:
+        jt.init.gauss_(m.weight, 0.0, 0.02)
+        if m.bias is not None:
+            jt.init.constant_(m.bias, 0.0)
+    elif classname.find("BatchNorm") != -1:
+        jt.init.gauss_(m.weight, 1.0, 0.02)
+        jt.init.constant_(m.bias, 0.0)
+
+
 class OASIS_model(nn.Module):
     def __init__(self, opt):
         super().__init__()
@@ -20,6 +31,7 @@ class OASIS_model(nn.Module):
                 self.VGG_loss = losses.VGGLoss(self.opt.gpu_ids)
         self.print_parameter_count()
         self.init_networks()
+        # init_networks([self.netG,self.netD])
         with jt.no_grad():
             self.netEMA = copy.deepcopy(self.netG) if not opt.no_EMA else None
         self.load_checkpoints()
@@ -104,24 +116,13 @@ class OASIS_model(nn.Module):
 
 
     def init_networks(self):
-        def init_weights(m, gain=0.02):
-            classname = m.__class__.__name__
-            if classname.find('BatchNorm2d') != -1:
-                if hasattr(m, 'weight') and m.weight is not None:
-                    init.gauss_(m.weight, 1.0, gain)
-                if hasattr(m, 'bias') and m.bias is not None:
-                    init.constant_(m.bias, 0.0)
-            elif hasattr(m, 'weight') and (classname.find('Conv') != -1 or classname.find('Linear') != -1):
-                init.xavier_gauss_(m.weight, gain=gain)
-                if hasattr(m, 'bias') and m.bias is not None:
-                    init.constant_(m.bias, 0.0)
-
         if self.opt.phase == "train":
             networks = [self.netG, self.netD]
         else:
             networks = [self.netG]
         for net in networks:
-            net.apply(init_weights)
+            for m in net.modules():
+                weights_init_normal(m)
 
 
 def preprocess_input(opt, data):

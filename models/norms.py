@@ -40,9 +40,9 @@ def get_spectral_norm(opt):
 # 计图支持多卡并行的bn，但不支持syncbn
 def get_norm_layer(opt, norm_nc):
     if opt.param_free_norm == 'instance':
-        return nn.InstanceNorm2d(norm_nc, affine=False)
+        return nn.InstanceNorm2d(norm_nc, affine=None)
     if opt.param_free_norm == 'batch':
-        return nn.BatchNorm2d(norm_nc, affine=False)
+        return nn.BatchNorm2d(norm_nc, affine=True)
     else:
         raise ValueError('%s is not a recognized param-free norm type in SPADE'
                          % opt.param_free_norm)
