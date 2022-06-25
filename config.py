@@ -30,6 +30,7 @@ def add_all_arguments(parser, train):
     #--- general options ---
     parser.add_argument('--name', type=str, default='label2coco', help='name of the experiment. It decides where to store samples and models')
     parser.add_argument('--seed', type=int, default=42, help='random seed')
+    
     ## gpu_ids
     parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
 
@@ -67,10 +68,10 @@ def add_all_arguments(parser, train):
         parser.add_argument('--continue_train', action='store_true', help='resume previously interrupted training')
         parser.add_argument('--which_iter', type=str, default='latest', help='which epoch to load when continue_train')
         parser.add_argument('--num_epochs', type=int, default=200, help='number of epochs to train')
-        parser.add_argument('--beta1', type=float, default=0.0, help='momentum term of adam')
+        parser.add_argument('--beta1', type=float, default=0.5, help='momentum term of adam')
         parser.add_argument('--beta2', type=float, default=0.999, help='momentum term of adam')
-        parser.add_argument('--lr_g', type=float, default=0.0001, help='G learning rate, default=0.0001')
-        parser.add_argument('--lr_d', type=float, default=0.0004, help='D learning rate, default=0.0004')
+        parser.add_argument('--lr', type=float, default=0.0002, help='learning rate, default=0.0001')
+        parser.add_argument('--no_TTUR', action='store_true', help='Use TTUR training scheme')
 
         parser.add_argument('--channels_D', type=int, default=64, help='# of discrim filters in first conv layer in discriminator')
         parser.add_argument('--add_vgg_loss', action='store_true', help='if specified, add VGG feature matching loss')
@@ -93,13 +94,13 @@ def set_dataset_default_lm(opt, parser):
         parser.set_defaults(lambda_labelmix=10.0)
         parser.set_defaults(EMA_decay=0.9999)
     if opt.dataset_mode == "cityscapes":
-        parser.set_defaults(lr_g=0.0004)
+        parser.set_defaults(lr=0.0004)
         parser.set_defaults(lambda_labelmix=5.0)
         parser.set_defaults(freq_fid=2500)
         parser.set_defaults(EMA_decay=0.999)
     # jittor landscape
     if opt.dataset_mode == "landscape":
-        parser.set_defaults(lr_g=0.0004)
+        parser.set_defaults(lr=0.0004)
         parser.set_defaults(lambda_labelmix=5.0)
         parser.set_defaults(EMA_decay=0.999)
     if opt.dataset_mode == "coco":

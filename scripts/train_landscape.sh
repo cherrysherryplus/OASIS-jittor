@@ -12,7 +12,7 @@
 # 子集：train 3200 验证 200 测试 1000
 # freq_smooth_loss 40->80
 python train.py \
---seed 617 \
+--seed 1111 \
 --name oasis_landscape \
 --dataset_mode landscape \
 --dataroot ./datasets/landscape --batch_size 8 --num_epochs 200 \
@@ -22,6 +22,8 @@ python train.py \
 --param_free_norm batch \
 --no_3dnoise \
 --norm_mod \
+--lr 0.0004 \
+--no_TTUR
 
 # --continue_train \
 # --which_iter latest

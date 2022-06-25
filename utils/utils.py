@@ -17,6 +17,40 @@ def fix_seed(seed):
     # np.random.seed(seed)
 
 
+def get_initial_optim_config(opt):
+    if opt.no_TTUR:
+        beta1, beta2 = opt.beta1, opt.beta2
+        G_lr, D_lr = opt.lr, opt.lr
+    else:
+        beta1, beta2 = 0, 0.9
+        G_lr, D_lr = opt.lr / 2, opt.lr * 2
+    return (beta1, beta2), (G_lr, D_lr)
+
+
+# TODO
+def update_learning_rate(optimizer_D, optimizer_G, old_lr, epoch, opt):
+    if epoch > opt.niter:
+        lrd = opt.lr / opt.niter_decay
+        new_lr = old_lr - lrd
+    else:
+        new_lr = old_lr
+
+    if new_lr != old_lr:
+        if opt.no_TTUR:
+            new_lr_G = new_lr
+            new_lr_D = new_lr
+        else:
+            new_lr_G = new_lr / 2
+            new_lr_D = new_lr * 2
+
+        for param_group in optimizer_D.param_groups:
+            param_group['lr'] = new_lr_D
+        for param_group in optimizer_G.param_groups:
+            param_group['lr'] = new_lr_G
+        print('update learning rate: %f -> %f' % (old_lr, new_lr))
+        old_lr = new_lr
+
+
 # 计算开始的epoch和iter
 def get_start_iters(start_iter, dataset_size):
     if start_iter == 0:

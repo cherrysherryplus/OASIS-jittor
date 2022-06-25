@@ -76,7 +76,7 @@ class InceptionV3(nn.Module):
         self.blocks = nn.ModuleList()
 
         if use_fid_inception:
-            inception = fid_inception_v3()
+            inception = fid_inception_v3(pretrained=True)
         else:
             inception = models.inception_v3(pretrained=True)
 

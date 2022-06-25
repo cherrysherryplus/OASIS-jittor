@@ -26,8 +26,9 @@ model = models.OASIS_model(opt)
 model.train()
 
 #--- create optimizers ---#
-optimizerG = jt.optim.Adam(model.netG.parameters(), lr=opt.lr_g, betas=(opt.beta1, opt.beta2))
-optimizerD = jt.optim.Adam(model.netD.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
+(beta1, beta2), (G_lr, D_lr) = utils.get_initial_optim_config(opt)
+optimizerG = jt.optim.Adam(model.netG.parameters(), lr=G_lr, betas=(beta1, beta2))
+optimizerD = jt.optim.Adam(model.netD.parameters(), lr=D_lr, betas=(beta1, beta2))
 
 #--- the training loop ---#
 already_started = False
