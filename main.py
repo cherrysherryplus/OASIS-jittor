@@ -22,7 +22,8 @@ if __name__ == '__main__':
     
     #--- cuda ---#
     # export JT_SYNC=1
-    jt.flags.use_cuda = (jt.has_cuda and opt.gpu_ids!="-1")
+    # jt.flags.use_cuda = (jt.has_cuda and opt.gpu_ids!="-1")
+    
     # jt.flags.amp_reg = jt.flags.amp_reg | 4
     # jt.flags.use_cuda_managed_allocator = 1
     # jt.flags.trace_py_var = 3
@@ -54,6 +55,7 @@ if __name__ == '__main__':
                 continue
             already_started = True
             cur_iter = epoch*len(dataloader) + i
+            print(cur_iter)
             image, label = models.preprocess_input(opt, data_i)
             
             #--- generator update ---#
