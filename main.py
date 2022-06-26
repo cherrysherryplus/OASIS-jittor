@@ -18,6 +18,9 @@ if __name__ == '__main__':
     opt.batch_size = 1
     opt.freq_fid = 2
     opt.freq_print = 1
+    
+    opt.no_TTUR = True
+    opt.lr = 0.002
     # opt.freq_save_loss = 1
     # opt.no_spectral_norm = True
     

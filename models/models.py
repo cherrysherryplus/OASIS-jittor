@@ -31,7 +31,6 @@ class OASIS_model(nn.Module):
                 self.VGG_loss = losses.VGGLoss(self.opt.gpu_ids)
         self.print_parameter_count()
         self.init_networks()
-        # init_networks([self.netG,self.netD])
         with jt.no_grad():
             self.netEMA = copy.deepcopy(self.netG) if not opt.no_EMA else None
         self.load_checkpoints()
