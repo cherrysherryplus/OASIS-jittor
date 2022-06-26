@@ -70,7 +70,7 @@ def add_all_arguments(parser, train):
         parser.add_argument('--num_epochs', type=int, default=200, help='number of epochs to train')
         parser.add_argument('--beta1', type=float, default=0.5, help='momentum term of adam')
         parser.add_argument('--beta2', type=float, default=0.999, help='momentum term of adam')
-        parser.add_argument('--lr', type=float, default=0.0002, help='learning rate, default=0.0001')
+        parser.add_argument('--lr', type=float, default=0.0001, help='learning rate, default=0.0001')
         parser.add_argument('--no_TTUR', action='store_true', help='Use TTUR training scheme')
 
         parser.add_argument('--channels_D', type=int, default=64, help='# of discrim filters in first conv layer in discriminator')

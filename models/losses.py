@@ -23,7 +23,6 @@ class losses_computer():
     def loss_labelmix(self, mask, output_D_mixed, output_D_fake, output_D_real):
         mixed_D_output = mask*output_D_real+(1-mask)*output_D_fake
         loss = self.labelmix_function(mixed_D_output, output_D_mixed)
-        print(f"loss labelmix: {loss}")
         return loss
 
 
@@ -55,16 +54,10 @@ def get_n1_target(opt, input, label, target_is_real):
 
 def get_target_tensor(opt, input, target_is_real):
     with jt.no_grad():
-        if opt.gpu_ids != "-1":
-            if target_is_real:
-                return jt.float32(1).expand_as(input)
-            else:
-                return jt.float32(0).expand_as(input)
+        if target_is_real:
+            return jt.float32(1).expand_as(input)
         else:
-            if target_is_real:
-                return jt.float32(1).expand_as(input)
-            else:
-                return jt.float32(0).expand_as(input)
+            return jt.float32(0).expand_as(input)
 
 
 class VGGLoss(nn.Module):

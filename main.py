@@ -10,19 +10,20 @@ import config
 if __name__ == '__main__':
     #--- read options ---#
     opt = config.read_arguments(train=True)
+    utils.fix_seed(18)
     opt.dataroot = "./datasets/sample_images"
     opt.norm_mod = True
     opt.num_epochs = 2
     # 24g p40 也不能把batch调到 8
     opt.batch_size = 1
-    opt.freq_fid = 4
+    opt.freq_fid = 2
     opt.freq_print = 1
     # opt.freq_save_loss = 1
     # opt.no_spectral_norm = True
     
     #--- cuda ---#
     # export JT_SYNC=1
-    # jt.flags.use_cuda = (jt.has_cuda and opt.gpu_ids!="-1")
+    jt.flags.use_cuda = (jt.has_cuda and opt.gpu_ids!="-1")
     
     # jt.flags.amp_reg = jt.flags.amp_reg | 4
     # jt.flags.use_cuda_managed_allocator = 1
@@ -43,8 +44,9 @@ if __name__ == '__main__':
     model = models.OASIS_model(opt)
 
     #--- create optimizers ---#
-    optimizerG = jt.optim.Adam(model.netG.parameters(), lr=opt.lr_g, betas=(opt.beta1, opt.beta2))
-    optimizerD = jt.optim.Adam(model.netD.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
+    (beta1, beta2), (G_lr, D_lr) = utils.get_initial_optim_config(opt)
+    optimizerG = jt.optim.Adam(model.netG.parameters(), lr=G_lr, betas=(beta1, beta2))
+    optimizerD = jt.optim.Adam(model.netD.parameters(), lr=D_lr, betas=(beta1, beta2))
 
     #--- the training loop ---#
     already_started = False

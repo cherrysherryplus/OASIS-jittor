@@ -43,7 +43,6 @@ for epoch in range(start_epoch, opt.num_epochs):
         image, label = models.preprocess_input(opt, data_i)
 
         #--- generator update ---#
-        # model.netG.zero_grad()
         optimizerG.zero_grad()
         loss_G, losses_G_list = model(image, label, "losses_G", losses_computer)
         loss_G, losses_G_list = loss_G.mean(), [loss.mean() if loss is not None else None for loss in losses_G_list]
@@ -51,7 +50,6 @@ for epoch in range(start_epoch, opt.num_epochs):
         optimizerG.step()
 
         #--- discriminator update ---#
-        # model.netD.zero_grad()
         optimizerD.zero_grad()
         loss_D, losses_D_list = model(image, label, "losses_D", losses_computer)
         loss_D, losses_D_list = loss_D.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list]

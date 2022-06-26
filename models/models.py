@@ -121,8 +121,7 @@ class OASIS_model(nn.Module):
         else:
             networks = [self.netG]
         for net in networks:
-            for m in net.modules():
-                weights_init_normal(m)
+            net.apply(weights_init_normal)
 
 
 def preprocess_input(opt, data):

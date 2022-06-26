@@ -22,8 +22,8 @@ python train.py \
 --param_free_norm batch \
 --no_3dnoise \
 --norm_mod \
---lr 0.0004 \
---no_TTUR
+--lr 0.0002 \
+# --no_TTUR
 
 # --continue_train \
 # --which_iter latest
